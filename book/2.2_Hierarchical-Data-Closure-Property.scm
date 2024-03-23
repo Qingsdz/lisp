@@ -205,5 +205,14 @@
 (define y (list 4 5 6))
 
 ;;Ex 2.28
-(define (deep-reverse items)
-  ())
+(define deep-reverse (trace-lambda deep-reverse (items)
+  (cond 
+    ((null? items) items)
+    ((not (pair? items)) 
+      (cons items '()))
+    (else (cons (deep-reverse (cdr items))
+                  (deep-reverse (car items))))
+  ))
+)
+
+

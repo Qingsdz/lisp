@@ -97,6 +97,5 @@
 
 (define (average-dump-n-times f n)
   (lambda (x) (((repeated average-dump n) f) x)))
-
 ;;;烂尾啦
 

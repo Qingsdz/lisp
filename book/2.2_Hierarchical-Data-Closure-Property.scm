@@ -40,6 +40,7 @@
 )
 
 ;;;(递归) 为了不去找尾巴 所以要在开头添加元素
+;;;此处递归是错误的 只能处理元素为单个的表 无法处理带有深度的表
 (define (append list1 list2)
   (if (null? list1)
     list2
@@ -175,7 +176,7 @@
                     answer)]
     )
   )
-  (iter items nil)
+  (iter items '())
 )
 
 ;;;2.23 for-each
@@ -204,15 +205,106 @@
 (define x (list 1 2 3))
 (define y (list 4 5 6))
 
+
+
 ;;Ex 2.28
+;;;reverse 迭代版本
+
+(define (reverse items)
+  (define (iter now result)
+    (if (null? now)
+        result
+        (iter (cdr now) (cons (car now)
+                              result))
+    )
+  )
+  (iter (cdr items) (car items))
+)
+;;;这个程序无法处理广义树
 (define deep-reverse (trace-lambda deep-reverse (items)
   (cond 
     ((null? items) items)
     ((not (pair? items)) 
-      (cons items '()))
-    (else (cons (deep-reverse (cdr items))
-                  (deep-reverse (car items))))
+      items)
+    (else (reverse (append  (deep-reverse (cdr items))
+                          (deep-reverse (car items)))))
   ))
 )
 
 
+
+(define test1 (list 1 2 (list 3 4) 5 (list 6 7)))
+(define test2 (list (list 1 2) (list 3 4)))
+
+;;;Ex 2.28 fringe
+(define fringe (trace-lambda fringe (items)
+  (cond
+    ((null? items) items)
+    ((not (pair? items)) (list items))
+    (else (append (fringe (car items)) (fringe (cdr items))))
+  ))
+)
+
+(define (fringe tree)
+  (cond 
+    ((empty-tree? tree) '())
+    ((leaf? tree) (list tree))
+    (else (append (fringe (left-branch tree))
+                  (fringe (right-branch tree))))
+  )
+)
+(define (empty-tree? tree)
+  (null? tree))
+(define (leaf? tree)
+  (not (pair? tree)))
+(define (left-branch tree)
+  (car tree))
+(define (right-branch tree)
+  (cdr tree))
+
+;;Ex2.29
+(define (make-mobile left right)
+  (list left right)  
+)
+(define (make-branch length structure)
+  (list length structure)
+)
+(define (left-branch mobile)
+  (car mobile)
+)
+(define (right-branch mobile)
+  (car (cdr mobile))
+)
+(define (branch-length branch)
+  (car branch)
+)
+(define (branch-structure branch)
+  (car (cdr branch))
+)   
+
+(define (total-weight mobile)
+  (define (not-connect-with-mobile? branch) 
+    (not (pair? (branch-structure branch)))
+  )
+  (define (branch-weight branch)
+    (if (not-connect-with-mobile? branch)
+      (branch-structure branch)
+      (total-weight (branch-structure branch))
+    )
+  )
+  (+  (branch-weight (left-branch mobile))
+      (branch-weight (right-branch mobile)))
+)
+
+(define (branch-torque branch)
+  (*  (branch-length branch)
+      (branch-weight branch)
+  )
+)
+(define ())
+
+(define branch-4-4 (make-branch 4 4))
+(define branch-4-5 (make-branch 4 5))
+(define mobile-4-5 (make-mobile branch-4-4 branch-4-5))
+(define branch-3-m (make-branch 3 mobile-4-5))
+(define mobile-3m-5 (make-mobile branch-3-m branch-5-5))
